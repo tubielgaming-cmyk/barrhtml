@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Layanan SMM</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #edf4f1;
+      margin: 0;
+      padding: 20px;
+    }
+    .filter-buttons {
+      max-width: 400px;
+      margin: auto;
+      margin-bottom: 20px;
+    }
+    .filter-buttons button {
+      width: 100%;
+      background: linear-gradient(to right, #d32f2f, #d32f2f);
+      color: white;
+      font-size: 16px;
+      padding: 12px;
+      border: none;
+      border-radius: 16px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      max-width: 400px;
+      margin: auto;
+      padding: 20px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .card h2 {
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 5px;
+    }
+    .form-control, select, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      font-size: 14px;
+    }
+    textarea {
+      resize: none;
+      height: 80px;
+      border: 1px solid #D32F2F;
+    }
+    .badge {
+      background: #d32f2f;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      margin-left: 4px;
+    }
+    .biaya {
+      display: flex;
+      gap: 10px;
+    }
+    .biaya span {
+      padding: 12px;
+      background: #f2f8f6;
+      border-radius: 12px;
+      border: 1px solid #ddd;
+      min-width: 40px;
+      text-align: center;
+    }
+    .btn {
+      background: linear-gradient(to right, #d32f2f, #d21f1f);
+      color: white;
+      border: none;
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    .struk {
+      display: none;
+      background: #fff;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      max-width: 400px;
+      margin: auto;
+    }
+
+    /* Gaya untuk pop-up PIN */
+    .pin-popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      display: none; /* Sembunyikan secara default */
+    }
+
+    .pin-popup-content {
+      background: #fff;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      max-width: 350px;
+      width: 90%;
+    }
+
+    .pin-popup-content h3 {
+      margin-top: 0;
+      color: #333;
+    }
+
+    .pin-input-group {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .pin-input {
+      width: 40px; /* Disesuaikan untuk 4 digit */
+      height: 40px;
+      font-size: 24px;
+      text-align: center;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      outline: none;
+      -moz-appearance: textfield; /* Sembunyikan panah di Firefox */
+    }
+
+    .pin-input::-webkit-outer-spin-button,
+    .pin-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .pin-message {
+      color: #d32f2f;
+      margin-top: 10px;
+      min-height: 20px; /* Untuk mencegah CLS */
+    }
+
+    .pin-popup-content .btn {
+      margin-top: 20px;
+    }
+
+    /* Gaya untuk pop-up Syarat & Ketentuan */
+    .popup-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .popup-content {
+      background: #fff;
+      padding: 30px 20px;
+      width: 90%;
+      max-width: 600px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      max-height: 85vh;
+      overflow-y: auto;
+      text-align: left;
+      transform: scale(0.8);
+      animation: scaleIn 0.4s ease forwards;
+    }
+
+    @keyframes scaleIn {
+      to { transform: scale(1); }
+    }
+
+    .popup-content h2 {
+      margin-top: 0;
+      text-align: center;
+    }
+
+    .popup-content ol {
+      padding-left: 20px;
+    }
+
+    .popup-content button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-right: 10px;
+      font-size: 16px;
+    }
+
+    .btn-mengerti {
+      background: #87ceeb;
+      color: white;
+    }
+
+    .btn-tidak {
+      background: #d32f2f;
+      color: white;
+    }
+
+    .admin-msg {
+      margin-top: 20px;
+      font-weight: bold;
+      color: #d32f2f;
+      text-align: center;
+    }
+
+    .admin-msg a {
+      color: #87ceeb;
+      text-decoration: none;
+    }
+
+    .loading-spinner {
+      display: none;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #d32f2f;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Pop-up kecil bawah */
+    .popup-bottom {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #87ceeb;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      z-index: 9999;
+      animation: slideUp 0.5s ease forwards;
+      display: none;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Gaya untuk pop-up Reset PIN */
+    .reset-pin-popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10001; /* Lebih tinggi dari PIN popup */
+      display: none;
+    }
+
+    .reset-pin-popup-content {
+      background: #fff;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      max-width: 350px;
+      width: 90%;
+    }
+
+    .reset-pin-popup-content h3 {
+      margin-top: 0;
+      color: #333;
+    }
+    .reset-pin-popup-content p {
+      margin-bottom: 20px;
+    }
+    .reset-pin-popup-content .btn {
+      margin-top: 10px; /* Lebih kecil dari PIN popup */
+    }
+
+    /* Gaya untuk pop-up Loading */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10003; /* Paling tinggi */
+      display: none;
+      flex-direction: column;
+      color: white;
+      font-size: 1.2em;
+    }
+
+    .loading-overlay .spinner {
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid #d32f2f;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1.5s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    .loading-overlay p {
+      margin: 0;
+    }
+
+    /* Gaya untuk pop-up Konfirmasi Pesanan */
+    .order-confirm-popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10002; /* Di antara PIN dan Loading */
+      display: none;
+    }
+
+    .order-confirm-popup-content {
+      background: #fff;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      max-width: 350px;
+      width: 90%;
+    }
+
+    .order-confirm-popup-content h3 {
+      margin-top: 0;
+      color: #333;
+    }
+    .order-confirm-popup-content p {
+      margin-bottom: 20px;
+    }
+    .order-confirm-popup-content .btn {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Pop-up besar Syarat & Ketentuan -->
+<div class="popup-overlay" id="popup">
+  <div class="popup-content">
+    <h2>Syarat & Ketentuan</h2>
+    <p>Dengan menggunakan layanan SMM, Anda dianggap telah membaca, memahami, dan menyetujui syarat & ketentuan berikut:</p>
+    <ol>
+      <li><strong>Tanggung Jawab Pengguna:</strong> Kesalahan input data bukan tanggung jawab kami.</li>
+      <li><strong>Non-Garansi:</strong> Tidak ada jaminan followers/likes/views tidak turun.</li>
+      <li><strong>Refund:</strong> Hanya berlaku jika pesanan gagal total.</li>
+      <li><strong>Waktu Proses:</strong> Bisa instan atau hingga 24 jam tergantung layanan.</li>
+      <li><strong>Larangan:</strong> Tidak boleh untuk konten ilegal, penipuan, SARA, atau pornografi.</li>
+      <li><strong>UserName:</strong> Kami tidak memproses orderan anda jika tidak mengisi username sesuai pada kolom.</li>
+      <li><strong>Perubahan:</strong> Kami bisa ubah syarat ini kapan saja tanpa pemberitahuan.</li>
+    </ol>
+    <p>Jika Anda tidak menyetujui, mohon untuk tidak melanjutkan penggunaan.</p>
+
+    <div style="text-align: center;">
+      <button class="btn-mengerti" onclick="setuju()">Mengerti</button>
+      <button class="btn-tidak" onclick="tidakSetuju()">Tidak</button>
+    </div>
+
+    <div class="loading-spinner" id="spinner">
+      <div class="spinner"></div>
+      <p>Mohon tunggu...</p>
+    </div>
+
+    <div class="admin-msg" id="adminMsg" style="display: none;">
+      Kamu belum paham? <a href="https://wa.me/6288228656096" target="_blank">Hubungi Admin di WhatsApp</a>
+    </div>
+  </div>
+</div>
+
+<!-- Pop-up kecil bawah Syarat & Ketentuan -->
+<div class="popup-bottom" id="popupBottom">
+  Syarat & Ketentuan Sudah Disetujui, <span id="namaUserSpan"></span>
+</div>
+
+<!-- Pop-up PIN -->
+<div class="pin-popup-overlay" id="pinPopup">
+  <div class="pin-popup-content">
+    <h3 id="pinPopupTitle">Masukkan PIN Anda</h3>
+    <p id="pinMessage" class="pin-message"></p>
+    <div class="pin-input-group">
+      <input type="number" class="pin-input" id="pin1" maxlength="1" onkeyup="moveToNext(this, 'pin2')" onfocus="this.select()">
+      <input type="number" class="pin-input" id="pin2" maxlength="1" onkeyup="moveToNext(this, 'pin3')" onfocus="this.select()">
+      <input type="number" class="pin-input" id="pin3" maxlength="1" onkeyup="moveToNext(this, 'pin4')" onfocus="this.select()">
+      <input type="number" class="pin-input" id="pin4" maxlength="1" onkeyup="moveToNext(this, null)" onfocus="this.select()">
+    </div>
+    <button class="btn" id="pinActionButton" onclick="handlePinAction()">Konfirmasi</button>
+    <button class="btn" style="background: #6c757d; margin-top: 10px;" onclick="cancelPinAction()">Batal</button>
+  </div>
+</div>
+
+<!-- Pop-up Reset PIN Confirmation -->
+<div class="reset-pin-popup-overlay" id="resetPinConfirmationPopup">
+  <div class="reset-pin-popup-content">
+    <h3>Reset PIN</h3>
+    <p>Apakah Anda yakin ingin mereset PIN Anda? Anda akan diminta untuk membuat PIN baru.</p>
+    <button class="btn" style="background: #d32f2f;" onclick="confirmResetPin()">Ya, Reset PIN</button>
+    <button class="btn" style="background: #6c757d;" onclick="cancelResetPin()">Batal</button>
+  </div>
+</div>
+
+<!-- Pop-up Konfirmasi Pesanan -->
+<div class="order-confirm-popup-overlay" id="orderConfirmPopup">
+  <div class="order-confirm-popup-content">
+    <h3>Konfirmasi Pesanan</h3>
+    <p>Apakah Anda yakin ingin melanjutkan pesanan ini?</p>
+    <button class="btn" style="background: #87ceeb;" onclick="confirmOrder()">Ya, Pesan Sekarang</button>
+    <button class="btn" style="background: #6c757d;" onclick="cancelOrderConfirmation()">Batalkan</button>
+  </div>
+</div>
+
+<!-- Pop-up Loading -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <p>Memproses pesanan...</p>
+</div>
+
+  <div class="filter-buttons">
+    <button onclick="filterKategori('Semua')">✱ Semua</button>
+    <button onclick="filterKategori('Facebook')">Facebook</button>
+    <button onclick="filterKategori('Instagram')">Instagram</button>
+    <button onclick="filterKategori('TikTok')">Tiktok</button>
+    <button onclick="filterKategori('Telegram')">Telegram</button>
+    <button onclick="filterKategori('Youtube')">Youtube</button>
+  </div>
+
+  <div class="card">
+    <h2>🛒 Buat Pesanan</h2>
+
+    <div class="form-group">
+      <label for="kategori">Kategori</label>
+      <select id="kategori" class="form-control" onchange="updateLayanan()">
+        <option>Pilih...</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="layanan">Layanan</label>
+      <select id="layanan" class="form-control" onchange="updateDeskripsi()">
+        <option>Pilih...</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <textarea id="deskripsi" readonly>Deskripsi layanan.</textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="link">Link/Target</label>
+      <input type="text" id="link" class="form-control" placeholder="https://...">
+    </div>
+
+    <div class="form-group">
+      <label>Jumlah <span id="minmax" class="badge">Min: 0 Max: 0</span></label>
+      <input type="number" id="jumlah" class="form-control" oninput="hitungBiaya()">
+    </div>
+
+    <div class="form-group">
+      <label>Biaya</label>
+      <div class="biaya">
+        <span>Rp</span>
+        <input type="text" id="biaya" class="form-control" readonly>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="nama">Nama User (Wajib Diisi Sesuai Teks Pada Kolom)</label>
+      <input type="text" id="nama" class="form-control" placeholder="{{nama_user}}">
+    </div>
+
+    <button class="btn" onclick="checkPinAndOrder()">Pesan</button>
+    <button class="btn" style="background: #87ceeb; margin-top: 15px;" onclick="showResetPinConfirmation()">Reset PIN</button>
+  </div>
+
+  <div class="struk" id="struk">
+    <h2>Struk Pemesanan</h2>
+    <p id="isiStruk" style="white-space: pre-wrap;"></p>
+    <button class="btn" onclick="kembali()">Kembali</button>
+  </div>
+
+  <script>
+    const semuaKategori = {
+      "Facebook Profile Followers": {
+        "Facebook Page Followers [ Max 500K ] | HQ Profiles | Refill & Cancel Enable | Non Drop | 30 Days ♻️": { harga: 3000/100, min: 50, deskripsi: "Facebook Page Followers | Refill & Cancel Enable | Non Drop | 30 Days ♻️" },
+        "Facebook Followers [ Page & Profile ] [ Max 1M ] | HQ Profiles | Cancel Enable | No Refill ⚠️ | Instant Start | Day 100K 🚀": { harga: 3500/100, min: 50, deskripsi: "Facebook Followers | Cancel Enable | Instant Start" }
+      },
+      "Instagram Followers Update": {
+        "Instagram Followers [ Max 25K ] | Real & Bot Profiles | Cancel Enable | No Refill ⚠️ | Day 2K Lambat": { harga: 2035/100, min: 50, deskripsi: "Instagram Followers | Real & Bot Profiles | Lambat" },
+        "Instagram Followers [ Max 500K ] | Old Accounts + Bot Mix | Cancel Enable | 30 Days ♻️ | Day 5K ⚡️": { harga: 2450/100, min: 50, deskripsi: "Instagram Followers | Old Accounts + Bot Mix" }
+      },
+      "TikTok Followers ᵁᴾᴰᴬᵀᴱᴰ": {
+        "TikTok Followers [ Max 1M ] | Live dulu baru bisa order layanan ini | 30 Days ♻️ | Instant Start | Day 200K 🚀❗": { harga: 3333/100, min: 100, deskripsi: "Wajib live sebelum dan sesudah order" },
+        "TikTok Followers [ Max 1M ] | %100 Real Accounts | Superinstant | No Refill ⚠️ | Speed : 100K/Day 🚀": { harga: 4360/100, min: 100, deskripsi: "100% Real Accounts | Superinstant" }
+      },
+      "TikTok Likes": {
+        "TikTok Likes [ Max 1M ] | LQ Profiles | Lifetime ♻️ | Instant Start | Day 50K": { harga: 481/100, min: 100, deskripsi: "LQ Profiles | Lifetime ♻️" },
+        "TikTok Likes [ Max 1M ] | LQ Profiles | No Refill ⚠️ | Instant Start | Day 20K": { harga: 594/100, min: 100, deskripsi: "LQ Profiles | No Refill" },
+        "TikTok Likes [ Max 50M ] | HQ & Real Profiles | Cancel Enable | Non Drop | No Refill ⚠️ | Instant Start | Day 200K 🚀": { harga: 710/100, min: 100, deskripsi: "BEST SPEED | Cancel Enable" }
+      },
+      "TikTok Views": {
+        "TikTok Video Views [ Max Unlimited ] | Cancel Enable | Instant Start | Day 10M 🚀 [ Cheap ]": { harga: 170/10000, min: 5000, deskripsi: "Cheap Views | Cancel Enable" },
+        "TikTok Video Views [ Max Unlimited ] | Lifetime ♻️ | Day 5M": { harga: 990/10000, min: 1000, deskripsi: "Lifetime Views" },
+        "TikTok Video Views [ Max Unlimited ] | Instant Start | [ Guaranteed ] Super fast ⚡⚡⚡⚡": { harga: 1090/10000, min: 1000, deskripsi: "Guaranteed Super Fast Views" }
+      },
+      "TikTok Saves": {
+        "TikTok Video Saves [ Max Unlimited ] | Cancel Enable | 30 Days ♻️ | Instant Start | Day 100K 🚀": { harga: 3330/1000, min: 50, deskripsi: "Video Saves | Cancel Enable" }
+      },
+      "Telegram Chanel Members (Garansi)": {
+        "Telegram Members Server 8 [ Refill 3Days ] [ Max 100k ] 20K/Day": { harga: 420/100, min: 10, deskripsi: "Garansi 3 Hari,Waktu Proses ±20 Menit" },
+        "Telegram Members Server 9 [ Refill 30Day ] [ Low Drop ] 10K/Day": { harga: 869/100, min: 10, deskripsi: "Garansi 30 Hari,Waktu Proses ±20 Menit" },
+        "Telegram Channel/Group Members [Refill 90Day] [Max 500K] [Real] Day 50K": { harga: 8699/500, min: 500, deskripsi: "Garansi 90 Hari,Waktu Proses ±20 Menit" }
+      },
+      "YouTube Subscribers": {
+        "YouTube Subscribers [ Max 500K ] | Real & Active | Refill & Cancel Enable | 30 Days ♻️": { harga: 4000/100, min: 50, deskripsi: "YouTube Subscribers | Refill & Cancel Enable | Active Subscribers" },
+        "YouTube Subscribers [ Max 1M ] | HQ Accounts | No Refill ⚠️ | Instant Start": { harga: 4500/100, min: 50, deskripsi: "YouTube Subscribers | HQ Accounts | No Refill" }
+      },
+      "YouTube Views": {
+        "YouTube Video Views [ Max Unlimited ] | Real Views | Instant Start | Day 1M": { harga: 700/1000, min: 1000, deskripsi: "YouTube Video Views | Real & Active Views" },
+        "YouTube Video Views [ Max Unlimited ] | Cheap Views | Cancel Enable": { harga: 500/1000, min: 1000, deskripsi: "YouTube Video Views | Cheap & Cancel Enable" }
+      },
+      "YouTube Likes": {
+        "YouTube Video Likes [ Max Unlimited ] | Real Accounts | Cancel Enable": { harga: 1000/100, min: 50, deskripsi: "YouTube Video Likes | Real Accounts | Cancel Enable" },
+        "YouTube Video Likes [ Max Unlimited ] | Cheap & Fast": { harga: 700/100, min: 50, deskripsi: "YouTube Video Likes | Cheap & Fast" }
+      }
+    };
+
+    let namaUser = "{{nama_user}}"; // Ganti nama user di sini jika diperlukan
+    let isCreatingPin = false; // Status untuk pembuatan PIN baru
+
+    // Fungsi untuk menampilkan pop-up Syarat & Ketentuan
+    function setuju() {
+      document.getElementById("spinner").style.display = "block";
+      document.querySelector(".btn-mengerti").style.display = "none";
+      document.querySelector(".btn-tidak").style.display = "none";
+
+      const waktu = Math.floor(Math.random() * (10000 - 4000 + 1)) + 4000;
+
+      setTimeout(() => {
+        document.getElementById("popup").style.display = "none";
+        document.getElementById("namaUserSpan").textContent = namaUser;
+        document.getElementById("popupBottom").style.display = "block";
+
+        setTimeout(() => {
+          document.getElementById("popupBottom").style.display = "none";
+        }, 5000); // otomatis hilang setelah 5 detik
+      }, waktu);
+    }
+
+    // Fungsi untuk menutup pop-up Syarat & Ketentuan jika tidak setuju
+    function tidakSetuju() {
+      document.getElementById("adminMsg").style.display = "block";
+    }
+
+    // Fungsi untuk memfilter kategori layanan
+    function filterKategori(kat) {
+      const kategori = document.getElementById("kategori");
+      kategori.innerHTML = '<option>Pilih...</option>';
+      for (const key in semuaKategori) {
+        if (kat === "Semua" || key.toLowerCase().includes(kat.toLowerCase())) {
+          const opt = document.createElement("option");
+          opt.value = key;
+          opt.textContent = key;
+          kategori.appendChild(opt);
+        }
+      }
+    }
+
+    // Fungsi untuk memperbarui daftar layanan berdasarkan kategori yang dipilih
+    function updateLayanan() {
+      const kategori = document.getElementById("kategori").value;
+      const layananSelect = document.getElementById("layanan");
+      layananSelect.innerHTML = '<option>Pilih...</option>';
+      if (semuaKategori[kategori]) {
+        for (const layanan in semuaKategori[kategori]) {
+          const opt = document.createElement("option");
+          opt.value = layanan;
+          opt.textContent = layanan;
+          layananSelect.appendChild(opt);
+        }
+      }
+      document.getElementById("deskripsi").value = "Deskripsi layanan.";
+      document.getElementById("jumlah").value = "";
+      document.getElementById("biaya").value = "";
+      document.getElementById("minmax").textContent = "Min: 0 Max: 0";
+    }
+
+    // Fungsi untuk memperbarui deskripsi layanan dan rentang min/max
+    function updateDeskripsi() {
+      const kategori = document.getElementById("kategori").value;
+      const layanan = document.getElementById("layanan").value;
+      const data = semuaKategori[kategori]?.[layanan];
+      if (data) {
+        document.getElementById("deskripsi").value = data.deskripsi;
+        document.getElementById("minmax").textContent = `Min: ${data.min}`;
+        hitungBiaya();
+      }
+    }
+
+    // Fungsi untuk menghitung biaya berdasarkan jumlah
+    function hitungBiaya() {
+      const kategori = document.getElementById("kategori").value;
+      const layanan = document.getElementById("layanan").value;
+      const jumlah = parseInt(document.getElementById("jumlah").value) || 0;
+      const data = semuaKategori[kategori]?.[layanan];
+      if (data && jumlah >= data.min) {
+        const total = jumlah * data.harga;
+        document.getElementById("biaya").value = total.toLocaleString("id-ID");
+      } else {
+        document.getElementById("biaya").value = "";
+      }
+    }
+
+    // Fungsi untuk memindahkan fokus input PIN
+    function moveToNext(currentInput, nextInputId) {
+      if (currentInput.value.length === currentInput.maxLength) {
+        if (nextInputId) {
+          document.getElementById(nextInputId).focus();
+        } else {
+          // Jika ini input terakhir, panggil fungsi handlePinAction
+          handlePinAction();
+        }
+      }
+    }
+
+    // Fungsi untuk mendapatkan PIN yang dimasukkan
+    function getEnteredPin() {
+      let pin = "";
+      for (let i = 1; i <= 4; i++) {
+        pin += document.getElementById(`pin${i}`).value;
+      }
+      return pin;
+    }
+
+    // Fungsi untuk membersihkan input PIN
+    function clearPinInputs() {
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById(`pin${i}`).value = "";
+      }
+      document.getElementById("pin1").focus();
+    }
+
+    // Fungsi untuk menampilkan pop-up PIN
+    function showPinPopup(isNewPin) {
+      isCreatingPin = isNewPin;
+      const pinPopup = document.getElementById("pinPopup");
+      const pinPopupTitle = document.getElementById("pinPopupTitle");
+      const pinActionButton = document.getElementById("pinActionButton");
+      const pinMessage = document.getElementById("pinMessage");
+
+      clearPinInputs();
+      pinMessage.textContent = "";
+
+      if (isNewPin) {
+        pinPopupTitle.textContent = "Buat PIN Baru (4 digit)";
+        pinActionButton.textContent = "Buat PIN";
+        pinMessage.textContent = "Masukkan PIN 4 digit yang ingin Anda gunakan.";
+      } else {
+        pinPopupTitle.textContent = "Masukkan PIN Anda";
+        pinActionButton.textContent = "Konfirmasi";
+        pinMessage.textContent = "";
+      }
+      pinPopup.style.display = "flex";
+      document.getElementById("pin1").focus();
+    }
+
+    // Fungsi untuk menampilkan animasi loading
+    function showLoadingOverlay() {
+      document.getElementById("loadingOverlay").style.display = "flex";
+    }
+
+    // Fungsi untuk menyembunyikan animasi loading
+    function hideLoadingOverlay() {
+      document.getElementById("loadingOverlay").style.display = "none";
+    }
+
+    // Fungsi untuk menangani aksi PIN (buat atau verifikasi)
+    function handlePinAction() {
+      const enteredPin = getEnteredPin();
+      const pinMessage = document.getElementById("pinMessage");
+
+      if (enteredPin.length !== 4) {
+        pinMessage.textContent = "PIN harus 4 digit.";
+        return;
+      }
+
+      if (isCreatingPin) {
+        // Simpan PIN baru
+        localStorage.setItem("userPin", enteredPin);
+        pinMessage.textContent = "PIN berhasil dibuat!";
+        setTimeout(() => {
+          document.getElementById("pinPopup").style.display = "none"; // Sembunyikan pop-up PIN
+          showOrderConfirmationPopup(); // Tampilkan pop-up konfirmasi pesanan
+        }, 500); // Beri sedikit waktu untuk melihat pesan berhasil
+      } else {
+        // Verifikasi PIN
+        const storedPin = localStorage.getItem("userPin");
+        if (enteredPin === storedPin) {
+          pinMessage.textContent = "PIN benar!";
+          setTimeout(() => {
+            document.getElementById("pinPopup").style.display = "none"; // Sembunyikan pop-up PIN
+            showOrderConfirmationPopup(); // Tampilkan pop-up konfirmasi pesanan
+          }, 500); // Beri sedikit waktu untuk melihat pesan benar
+        } else {
+          pinMessage.textContent = "PIN salah. Coba lagi.";
+          clearPinInputs();
+        }
+      }
+    }
+
+    // Fungsi untuk membatalkan aksi PIN
+    function cancelPinAction() {
+      document.getElementById("pinPopup").style.display = "none";
+      clearPinInputs();
+    }
+
+    // Fungsi yang dipanggil saat tombol "Pesan" diklik
+    function checkPinAndOrder() {
+      const storedPin = localStorage.getItem("userPin");
+      if (storedPin) {
+        showPinPopup(false); // Minta verifikasi PIN
+      } else {
+        showPinPopup(true); // Minta buat PIN baru
+      }
+    }
+
+    // Fungsi untuk menampilkan pop-up konfirmasi reset PIN
+    function showResetPinConfirmation() {
+      document.getElementById("resetPinConfirmationPopup").style.display = "flex";
+    }
+
+    // Fungsi untuk mengkonfirmasi reset PIN
+    function confirmResetPin() {
+      localStorage.removeItem("userPin"); // Hapus PIN dari localStorage
+      document.getElementById("resetPinConfirmationPopup").style.display = "none";
+      showPinPopup(true); // Langsung minta buat PIN baru
+    }
+
+    // Fungsi untuk membatalkan reset PIN
+    function cancelResetPin() {
+      document.getElementById("resetPinConfirmationPopup").style.display = "none";
+    }
+
+    // --- Fungsi baru untuk Konfirmasi Pesanan ---
+    function showOrderConfirmationPopup() {
+      document.getElementById("orderConfirmPopup").style.display = "flex";
+    }
+
+    function confirmOrder() {
+      document.getElementById("orderConfirmPopup").style.display = "none"; // Sembunyikan pop-up konfirmasi
+      showLoadingOverlay(); // Tampilkan loading overlay
+
+      const loadingTime = Math.floor(Math.random() * (8000 - 4000 + 1)) + 4000; // Random 4-8 detik
+
+      setTimeout(() => {
+        hideLoadingOverlay(); // Sembunyikan loading overlay
+        buatStruk(); // Lanjutkan proses pembuatan struk
+      }, loadingTime);
+    }
+
+    function cancelOrderConfirmation() {
+      document.getElementById("orderConfirmPopup").style.display = "none";
+      // Opsional: bisa kembali ke tampilan utama atau melakukan hal lain
+    }
+    // --- Akhir Fungsi baru untuk Konfirmasi Pesanan ---
+
+    // Fungsi untuk membuat struk pemesanan dan mengirim ke Telegram
+    function buatStruk() {
+      const kategori = document.getElementById("kategori").value;
+      const layanan = document.getElementById("layanan").value;
+      const link = document.getElementById("link").value;
+      const jumlah = document.getElementById("jumlah").value;
+      const nama = document.getElementById("nama").value || "Tanpa Nama";
+      const biaya = document.getElementById("biaya").value;
+      const now = new Date();
+      const jam = now.getHours().toString().padStart(2, "0");
+      const menit = now.getMinutes().toString().padStart(2, "0");
+      const detik = now.getSeconds().toString().padStart(2, "0");
+
+      const isi = `Woww!! Pesanan Anda Akan Segera Diproses, Berikut Data pesanan Anda :
+==============================
+Dibuat : ${jam}:${menit}
+Kategori : ${kategori}
+Layanan : ${layanan}
+Link/Target : ${link}
+Jumlah : ${jumlah}
+==============================
+Terimakasih sudah order, Kami tunggu orderan selanjutnyaa...`;
+
+      document.getElementById("isiStruk").innerHTML = isi;
+
+      // Kirim ke Telegram
+      const BOT_TOKEN = "BOT TOKEN TELE LU";
+      const CHAT_ID = "CHAT ID TELR LU";
+
+      fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: CHAT_ID,
+          text: `Pesanan Baru:\n\nNama User: ${nama}\nKategori: ${kategori}\nLayanan: ${layanan}\nLink/Target: ${link}\nJumlah: ${jumlah}\nBiaya: Rp ${biaya}`,
+        }),
+      });
+
+      document.querySelector(".card").style.display = "none";
+      document.getElementById("struk").style.display = "block";
+    }
+
+    // Fungsi untuk kembali ke halaman utama dari struk
+    function kembali() {
+      document.querySelector(".card").style.display = "block";
+      document.getElementById("struk").style.display = "none";
+    }
+
+    // Inisialisasi awal
+    filterKategori('Semua');
+  </script>
+</body>
+</html>
